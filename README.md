@@ -18,9 +18,7 @@ The following screenshots shows gives a before/after overview (in the right imag
 		src="https://user-images.githubusercontent.com/2184309/187506646-907ed39d-83b5-42f2-973e-26588bb67fc2.jpg" 
 		width="47%"
 	>
-
 	&nbsp; &nbsp; 
-
 	<img 
 		alt="Default Roam theme with the scrollbars plugin" 
 		title="Default Roam theme with the scrollbars plugin" 
