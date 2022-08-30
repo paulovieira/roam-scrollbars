@@ -137,8 +137,6 @@ function initializeSettings() {
 		description: `
 			If this setting is activated, the scroll happens only on the children of the block/page being embeded. That is, the root block (the one associated to the block reference) will always be visible. The scroll starts only on the children.
 			NOTE: for page embededs, this is the only way to have a scroll. 
-			
-			
 		`,
 		action: {
 			type: 'switch',
@@ -409,6 +407,7 @@ function addStyle() {
 	}
 
 	let extensionStyle = document.createElement('style');
+	
 	extensionStyle.textContent = textContent;
 	extensionStyle.dataset.id = `${internals.extensionId}-${Date.now()}`;
 	extensionStyle.dataset.title = `dynamic styles added by the ${internals.extensionId} extension`;
