@@ -15,14 +15,14 @@ The following screenshots shows gives a before/after overview (in the right imag
 	<img 
 		alt="Default Roam theme without the scrollbars plugin" 
 		title="Default Roam theme without the scrollbars plugin" 
-		src="https://user-images.githubusercontent.com/2184309/187506646-907ed39d-83b5-42f2-973e-26588bb67fc2.jpg" 
+		src="https://user-images.githubusercontent.com/2184309/187560798-51c70060-54f3-4c31-9f85-21f94b63dee6.jpg" 
 		width="47%"
 	>
 	&nbsp; &nbsp; 
 	<img 
 		alt="Default Roam theme with the scrollbars plugin" 
 		title="Default Roam theme with the scrollbars plugin" 
-		src="https://user-images.githubusercontent.com/2184309/187506742-eb01578e-30da-47f4-a907-62e5696b5235.jpg" 
+		src="https://user-images.githubusercontent.com/2184309/187560809-ee9fb2a7-1363-4aa7-86c9-97b3ab16bf40.jpg" 
 		width="47%"
 	>
 </p>
