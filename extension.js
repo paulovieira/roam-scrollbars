@@ -1,6 +1,6 @@
 let internals = {};
 
-internals.extensionId = 'toggle-scrollbar';
+internals.extensionId = 'roam-scrollbars';
 
 // dev mode can activated by using the special key/value 'dev=true' in the query string;
 // example: https://roamresearch.com?dev=true/#/app/<GRAPH_NAME>
@@ -15,6 +15,7 @@ internals.settingsCached = {
 
 	blockEmbedScrollbarWidth: null,
 	blockEmbedMaxHeight: null,
+	blockEmbedScrollOnChildren: null,
 
 	codeBlockScrollbarWidth: null,
 	codeBlockMaxHeight: null,
@@ -25,6 +26,7 @@ internals.settingsDefault = {
 
 	blockEmbedScrollbarWidth: '6px',
 	blockEmbedMaxHeight: '50%',
+	blockEmbedScrollOnChildren: true,
 
 	codeBlockScrollbarWidth: '6px',
 	codeBlockMaxHeight: '50%',
@@ -76,7 +78,7 @@ function initializeSettings() {
 	log('initializeSettings');
 
 	let panelConfig = {
-		tabTitle: 'Toggle scrollbar',
+		tabTitle: 'Scrollbars',
 		settings: []
 	};
 
@@ -86,7 +88,7 @@ function initializeSettings() {
 		id: 'mainViewScrollbarWidth',
 		name: 'Main view and sidebar: scrollbar width (px)',
 		description: `
-			Make the scrollbar thinner or fatter. Values between 8 and 12 should be good for most people. 
+			Values between 8 and 12 should be good for most people. 
 			Set to "disabled" to refrain from adding any css related to this feature (the css from the current theme will then be used).
 		`,
 		action: {
@@ -100,10 +102,10 @@ function initializeSettings() {
 
 	panelConfig.settings.push({
 		id: 'blockEmbedScrollbarWidth',
-		name: 'Block embeds: scrollbar width',
+		name: 'Block/page embeds: scrollbar width',
 		description: `
-			By default Roam will expand the container of a block embed as much as necessary. However when using embeds of "long" blocks (with many children), it might be more convenient to have a maximum height for the embed (in which case a scrollbar is necessary). 
-			This setting is used to define the width of scrollbars in block embeds. The next setting is used to define the maximum height in block embeds. 
+			By default Roam will expand the container of a block/page embed as much as necessary. However when using embeds of "long" blocks/pages (with many children), it might be convenient to have a maximum height for the embed (in which case a scrollbar is necessary). 
+			This setting is used to define the width of scrollbars in embeds. The next setting is used to define the respective maximum height. 
 			Set to "disabled" to refrain from adding any css related to this feature (the css from the current theme will then be used). 
 			TIP: having this width smaller than the width of the main view is a good choice.
 		`,
@@ -116,9 +118,9 @@ function initializeSettings() {
 
 	panelConfig.settings.push({
 		id: 'blockEmbedMaxHeight',
-		name: 'Block embeds: maximum height',
+		name: 'Block/page embeds: maximum height',
 		description: `
-			This setting defines a maximum height for block embeds. This is useful in "long" block embeds to quickly see the beginning/end of the embed in relation to the other blocks. 
+			This setting defines a maximum height for block/page embeds. This is useful to quickly see the beginning/end of the embed in relation to the surrounding blocks. 
 			The numeric values are a percentage of the viewport height. 
 			Set to "disabled" to refrain from adding any css related to this feature (the css from the current theme will then be used).
 		`,
@@ -129,13 +131,29 @@ function initializeSettings() {
 		},
 	});
 
+	panelConfig.settings.push({
+		id: 'blockEmbedScrollOnChildren',
+		name: 'Block/page embeds: scroll only on children',
+		description: `
+			If this setting is activated, the scroll happens only on the children of the block/page being embeded. That is, the root block (the one associated to the block reference) will always be visible. The scroll starts only on the children.
+			NOTE: for page embededs, this is the only way to have a scroll. 
+			
+			
+		`,
+		action: {
+			type: 'switch',
+			onChange: ev => { updateSettingsCached({ key: 'blockEmbedScrollOnChildren', value: ev.target.checked }); resetStyle(); },
+		},
+	});
+
 	// options for code blocks
 
 	panelConfig.settings.push({
 		id: 'codeBlockScrollbarWidth',
 		name: 'Code blocks: scrollbar width',
 		description: `
-			By default Roam will not show any scrollbars in code blocks (even for long code blocks, where the maximum height is reached). Use this setting if you prefer to actually have a scrollbar in code blocks (visible only when the maximum height is reached). Use the next setting to customize the maximum height of code blocks.
+			By default Roam will not show any scrollbars in code blocks (even for long code blocks, where the maximum height of 1000px is reached). 
+			Use this setting if you prefer to actually have a scrollbar in code blocks (visible only when the maximum height is reached). Use the next setting to customize the respective maximum height.
 			Set to "disabled" to refrain from adding any css related to this feature (the css from the current theme will then be used).
 			TIP: having this width smaller than the width of the main view is a good choice.
 		`,
@@ -150,7 +168,7 @@ function initializeSettings() {
 		id: 'codeBlockMaxHeight',
 		name: 'Code blocks: maximum height',
 		description: `
-			By default Roam has a maximum height of 1000px for code blocks (around 48 lines of code). However, it might be convenient to change the unit of that maximum height from pixels (absolute) to a percentage of the viewport height (relative). This is useful to quickly see the beginning/end of the code block in relation to the other blocks, regardless of the size of the code block and the size the of screen being used.
+			By default Roam has a maximum height of 1000px for code blocks (that's around 48 lines of code). However, it might be convenient to change the unit of that maximum height from pixels (absolute) to a percentage of the viewport height (relative). This is useful to quickly see the beginning/end of the code block in relation to the surrounding blocks, regardless of the size of the code block and the size the of screen being used.
 			Set to "disabled" to refrain from adding any css related to this feature (the css from the current theme will then be used).
 		`,
 		action: {
@@ -186,7 +204,7 @@ function updateSettingsCached({ key, value }) {
 
 	// clean the units from the numeric value
 
-	if (value.endsWith('px') || value.endsWith('%')) { 
+	if (typeof value === 'string' && (value.endsWith('px') || value.endsWith('%'))) { 
 		value = parseInt(value) 
 	}
 
@@ -207,7 +225,7 @@ function removeStyle() {
 
 	log('removeStyle');
 
-	// we assume no one else has added a <style data-id="toggle-scrollbar-28373625"> before, which seems
+	// we assume no one else has added a <style data-id="roam-scrollbars-28373625"> before, which seems
 	// to be a strong hypothesis
 
 	let extensionStyles = Array.from(document.head.querySelectorAll(`style[data-id^="${internals.extensionId}"]`));
@@ -220,7 +238,7 @@ function addStyle() {
 
 	let textContent = '';
 	let { mainViewScrollbarWidth } = internals.settingsCached;
-	let { blockEmbedScrollbarWidth, blockEmbedMaxHeight } = internals.settingsCached;
+	let { blockEmbedScrollbarWidth, blockEmbedMaxHeight, blockEmbedScrollOnChildren } = internals.settingsCached;
 	let { codeBlockScrollbarWidth, codeBlockMaxHeight } = internals.settingsCached;
 
 	const mainViewSelector = 'div.rm-article-wrapper';
@@ -255,39 +273,107 @@ function addStyle() {
 	}
 
 	if (blockEmbedScrollbarWidth !== 'disabled') {
+		if (blockEmbedScrollOnChildren) {
+			textContent += `
+
+				/* setting: blockEmbedScrollbarWidth + blockEmbedScrollOnChildren */
+
+				${mainViewSelector} div.rm-embed-inner-block-hide > div.roam-block-container > div.rm-level-1::-webkit-scrollbar {
+					width: ${blockEmbedScrollbarWidth}px;
+				}
+
+				${sidebarSelector} div.rm-embed-inner-block-hide > div.roam-block-container > div.rm-level-1::-webkit-scrollbar {
+					width: ${blockEmbedScrollbarWidth}px;
+				}
+			`;
+		}
+		else {
+			textContent += `
+
+				/* setting: blockEmbedScrollbarWidth */
+
+				${mainViewSelector} div.rm-embed-inner-block-hide > div.roam-block-container::-webkit-scrollbar {
+					width: ${blockEmbedScrollbarWidth}px;
+				}
+
+				${sidebarSelector} div.rm-embed-inner-block-hide > div.roam-block-container::-webkit-scrollbar {
+					width: ${blockEmbedScrollbarWidth}px;
+				}
+			`;
+		}
+
+		// for page embeds the only place that seems to work is here
+
 		textContent += `
 
-			/* setting: blockEmbedScrollbarWidth */
-
-			${mainViewSelector} div.rm-embed-inner-block-hide > div.roam-block-container::-webkit-scrollbar {
+			${mainViewSelector} div.rm-embed__content::-webkit-scrollbar {
 				width: ${blockEmbedScrollbarWidth}px;
 			}
 
-			${sidebarSelector} div.rm-embed-inner-block-hide > div.roam-block-container::-webkit-scrollbar {
+			${sidebarSelector} div.rm-embed__content::-webkit-scrollbar {
 				width: ${blockEmbedScrollbarWidth}px;
 			}
-
 		`;
 	}
 
 	if (blockEmbedMaxHeight !== 'disabled') {
+		if (blockEmbedScrollOnChildren) {
+			textContent += `
+
+				/* setting: blockEmbedMaxHeight + blockEmbedScrollOnChildren */
+				/* padding-bottom is a css hack to avoid showing the scrollbar when the embed height is < embed max height */
+
+				${mainViewSelector} div.rm-embed-inner-block-hide > div.roam-block-container > div.rm-level-1 {
+					max-height: ${blockEmbedMaxHeight}vh;
+					overflow-y: auto;
+					padding-bottom: 14px;
+					display: block;
+				}
+				
+				${sidebarSelector} div.rm-embed-inner-block-hide > div.roam-block-container > div.rm-level-1 {
+					max-height: ${blockEmbedMaxHeight}vh;
+					overflow-y: auto;
+					padding-bottom: 14px;
+					display: block;
+				}
+			`;
+		}
+		else {
+			textContent += `
+
+				/* setting: blockEmbedMaxHeight */
+				/* padding-bottom is a css hack to avoid showing the scrollbar when the embed height is < embed max height */
+
+				${mainViewSelector} div.rm-embed-inner-block-hide > div.roam-block-container {
+					max-height: ${blockEmbedMaxHeight}vh;
+					overflow-y: auto;
+					padding-bottom: 14px;
+				}
+
+				${sidebarSelector} div.rm-embed-inner-block-hide > div.roam-block-container {
+					max-height: ${blockEmbedMaxHeight}vh;
+					overflow-y: auto;
+					padding-bottom: 14px;
+				}
+			`;
+		}
+
+		// for page embeds the only place that seems to work is here; no need to use the padding-bottom hack here;
+
 		textContent += `
 
-			/* setting: blockEmbedMaxHeight */
-
-			${mainViewSelector} div.rm-embed-inner-block-hide > div.roam-block-container {
+			${mainViewSelector} div.rm-embed__content {
 				max-height: ${blockEmbedMaxHeight}vh;
 				overflow-y: auto;
-				padding-bottom: 14px;  /* css hack: avoid showing the scrollbar when the embed height is < embed max height */
+				padding-left: 6px;
 			}
 
-			${sidebarSelector} div.rm-embed-inner-block-hide > div.roam-block-container {
+			${sidebarSelector} div.rm-embed__content {
 				max-height: ${blockEmbedMaxHeight}vh;
 				overflow-y: auto;
-				padding-bottom: 14px;  /* css hack: avoid showing the scrollbar when the embed height is < embed max height */
+				padding-left: 6px;
 			}
-
-		`;
+		`
 	}
 
 	if (codeBlockScrollbarWidth !== 'disabled') {
@@ -302,7 +388,6 @@ function addStyle() {
 			${sidebarSelector} div.cm-scroller::-webkit-scrollbar {
 				width: ${codeBlockScrollbarWidth}px;
 			}
-
 		`;
 	}
 
@@ -320,7 +405,6 @@ function addStyle() {
 				max-height: ${codeBlockMaxHeight}vh;
 				overflow-y: auto;
 			}
-
 		`;
 	}
 
