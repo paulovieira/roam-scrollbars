@@ -15,7 +15,7 @@ The following screenshots shows gives a before/after overview (in the right imag
 	<img 
 		alt="Default Roam theme without the scrollbars plugin" 
 		title="Default Roam theme without the scrollbars plugin" 
-		src="https://user-images.githubusercontent.com/2184309/187560798-51c70060-54f3-4c31-9f85-21f94b63dee6.jpg" 
+		src="https://user-images.githubusercontent.com/2184309/187561666-418598c2-adf3-4e92-a90b-a61ebb1944e8.jpg" 
 		width="47%"
 	>
 	&nbsp; &nbsp; 
