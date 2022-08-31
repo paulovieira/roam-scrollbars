@@ -26,7 +26,7 @@ internals.settingsDefault = {
 
 	blockEmbedScrollbarWidth: '6px',
 	blockEmbedMaxHeight: '50%',
-	blockEmbedScrollOnChildren: true,
+	blockEmbedScrollOnChildren: false,
 
 	codeBlockScrollbarWidth: '6px',
 	codeBlockMaxHeight: '50%',

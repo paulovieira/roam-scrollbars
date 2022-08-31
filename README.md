@@ -40,6 +40,7 @@ All settings/features in this extension can be disabled. When the "disabled" opt
 
 ## Future improvements
 
+- the controls in the settings panel look ugly because of the long descriptions; can we have more control there? how are other extesions doing this?
 - detect if the plugin is being loaded in the mobile app in android, and if necessary, don't add the stylesheet (?)
 - check if the other types of embeds can also benefit from max-height + scrollbar: PDF embed, Website embed, etc
 - what else can be improved? feedback is welcome!
