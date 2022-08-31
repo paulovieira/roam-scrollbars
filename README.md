@@ -9,7 +9,7 @@ The default Roam theme [doesn't show scrollbars](https://github.com/paulovieira/
 - set the scrollbar width and maximum height of block embeds and page embeds
 	- for block embeds, you can optionally make the scroll start only in the children (of the block being embeded)
 
-The following screenshots shows gives a before/after overview (in the right image notice the scrollbars in the main view and sidebar, and the height of the block embed and code block).
+The following screenshots gives a before/after overview. In the right image notice the scrollbars in the main view and sidebar, and the height of the block embed and code block. In this case the settings "maximum height" were configured with "30%" (a percentage of the screen height). However you also can disable this feature.
 
 <p align="center">
 	<img 
