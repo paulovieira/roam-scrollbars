@@ -25,11 +25,11 @@ internals.settingsDefault = {
 	mainViewScrollbarWidth: '8px',
 
 	blockEmbedScrollbarWidth: '6px',
-	blockEmbedMaxHeight: '50%',
+	blockEmbedMaxHeight: '50vh',
 	blockEmbedScrollOnChildren: false,
 
 	codeBlockScrollbarWidth: '6px',
-	codeBlockMaxHeight: '50%',
+	codeBlockMaxHeight: '50vh',
 };
 
 function onload({ extensionAPI }) {
@@ -38,21 +38,7 @@ function onload({ extensionAPI }) {
 
 	internals.extensionAPI = extensionAPI;
 	initializeSettings();
-
-	let unloadHandler = () => { 
-
-		log('unloadHandler');
-		removeStyle();
-	};
-
-	internals.unloadHandlers.push(unloadHandler);
-
-	// we have to resort to dynamic stylesheets (instead of using extension.css directly) to be able to support 
-	// the 'disabled' option in our settings (when 'disabled' is selected, we don't add any css at all relative 
-	// to that setting/feature); this is the simplest way to avoid having css rules that might conflict with 
-	// other extensions/themes;
-	
-	resetStyle();
+	main();
 
 	log('ONLOAD (end)');
 }
@@ -64,6 +50,19 @@ function onunload() {
 	internals.unloadHandlers.forEach(unloadHandler => { unloadHandler() })
 
 	log('ONUNLOAD (end)');
+}
+
+function main() {
+	
+	resetStyle();
+
+	let unloadHandler = () => { 
+
+		log('unloadHandler');
+		removeStyle();
+	};
+
+	internals.unloadHandlers.push(unloadHandler);
 }
 
 function log() {
@@ -126,7 +125,7 @@ function initializeSettings() {
 		`,
 		action: {
 			type: 'select',
-			items: ['disabled', '10%', '20%', '30%', '40%', '50%', '60%', '70%', '80%', '90%', '100%'],
+			items: ['disabled', '10vh', '20vh', '30vh', '40vh', '50vh', '60vh', '70vh', '80vh', '90vh', '100vh'],
 			onChange: value => { updateSettingsCached({ key: 'blockEmbedMaxHeight', value }); resetStyle(); },
 		},
 	});
@@ -171,7 +170,7 @@ function initializeSettings() {
 		`,
 		action: {
 			type: 'select',
-			items: ['disabled', '20%', '30%', '40%', '50%', '60%', '70%', '80%', '90%', '100%'],
+			items: ['disabled', '20vh', '30vh', '40vh', '50vh', '60vh', '70vh', '80vh', '90vh', '100vh'],
 			onChange: value => { updateSettingsCached({ key: 'codeBlockMaxHeight', value }); resetStyle(); },
 		},
 	});
@@ -200,12 +199,6 @@ function initializeSettings() {
 
 function updateSettingsCached({ key, value }) {
 
-	// clean the units from the numeric value
-
-	if (typeof value === 'string' && (value.endsWith('px') || value.endsWith('%'))) { 
-		value = parseInt(value) 
-	}
-
 	internals.settingsCached[key] = value;
 
 	log('updateSettingsCached', { key, value, 'internals.settingsCached': internals.settingsCached });
@@ -213,9 +206,15 @@ function updateSettingsCached({ key, value }) {
 
 function resetStyle() {
 
-	// setTimeout is used to improve the chances of our css styles being loaded after styles from other extensions
+	// we have to resort to dynamic stylesheets (instead of using extension.css directly) to be able
+	// to support the 'disabled' option in our settings (when 'disabled' is selected, we don't add  
+	// any css at all relative to that setting/feature); this is the simplest way to avoid having 
+	// css rules that might conflict with other extensions/themes;
 
 	removeStyle();
+
+	// use setTimeout to make sure our css styles are loaded after styles from other extensions
+
 	setTimeout(addStyle, 100);  
 }
 
@@ -248,11 +247,11 @@ function addStyle() {
 			/* setting: mainViewScrollbarWidth */
 
 			${mainViewSelector}::-webkit-scrollbar {
-				width: ${mainViewScrollbarWidth}px;
+				width: ${mainViewScrollbarWidth};
 			}
 
 			${sidebarSelector}::-webkit-scrollbar {
-				width: ${mainViewScrollbarWidth}px;
+				width: ${mainViewScrollbarWidth};
 			}
 
 			/* firefox only; reference: https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Scrollbars */
@@ -277,11 +276,11 @@ function addStyle() {
 				/* setting: blockEmbedScrollbarWidth + blockEmbedScrollOnChildren */
 
 				${mainViewSelector} div.rm-embed-inner-block-hide > div.roam-block-container > div.rm-level-1::-webkit-scrollbar {
-					width: ${blockEmbedScrollbarWidth}px;
+					width: ${blockEmbedScrollbarWidth};
 				}
 
 				${sidebarSelector} div.rm-embed-inner-block-hide > div.roam-block-container > div.rm-level-1::-webkit-scrollbar {
-					width: ${blockEmbedScrollbarWidth}px;
+					width: ${blockEmbedScrollbarWidth};
 				}
 			`;
 		}
@@ -291,11 +290,11 @@ function addStyle() {
 				/* setting: blockEmbedScrollbarWidth */
 
 				${mainViewSelector} div.rm-embed-inner-block-hide > div.roam-block-container::-webkit-scrollbar {
-					width: ${blockEmbedScrollbarWidth}px;
+					width: ${blockEmbedScrollbarWidth};
 				}
 
 				${sidebarSelector} div.rm-embed-inner-block-hide > div.roam-block-container::-webkit-scrollbar {
-					width: ${blockEmbedScrollbarWidth}px;
+					width: ${blockEmbedScrollbarWidth};
 				}
 			`;
 		}
@@ -305,11 +304,11 @@ function addStyle() {
 		textContent += `
 
 			${mainViewSelector} div.rm-embed__content::-webkit-scrollbar {
-				width: ${blockEmbedScrollbarWidth}px;
+				width: ${blockEmbedScrollbarWidth};
 			}
 
 			${sidebarSelector} div.rm-embed__content::-webkit-scrollbar {
-				width: ${blockEmbedScrollbarWidth}px;
+				width: ${blockEmbedScrollbarWidth};
 			}
 		`;
 	}
@@ -322,14 +321,14 @@ function addStyle() {
 				/* padding-bottom is a css hack to avoid showing the scrollbar when the embed height is < embed max height */
 
 				${mainViewSelector} div.rm-embed-inner-block-hide > div.roam-block-container > div.rm-level-1 {
-					max-height: ${blockEmbedMaxHeight}vh;
+					max-height: ${blockEmbedMaxHeight};
 					overflow-y: auto;
 					padding-bottom: 14px;
 					display: block;
 				}
 				
 				${sidebarSelector} div.rm-embed-inner-block-hide > div.roam-block-container > div.rm-level-1 {
-					max-height: ${blockEmbedMaxHeight}vh;
+					max-height: ${blockEmbedMaxHeight};
 					overflow-y: auto;
 					padding-bottom: 14px;
 					display: block;
@@ -343,13 +342,13 @@ function addStyle() {
 				/* padding-bottom is a css hack to avoid showing the scrollbar when the embed height is < embed max height */
 
 				${mainViewSelector} div.rm-embed-inner-block-hide > div.roam-block-container {
-					max-height: ${blockEmbedMaxHeight}vh;
+					max-height: ${blockEmbedMaxHeight};
 					overflow-y: auto;
 					padding-bottom: 14px;
 				}
 
 				${sidebarSelector} div.rm-embed-inner-block-hide > div.roam-block-container {
-					max-height: ${blockEmbedMaxHeight}vh;
+					max-height: ${blockEmbedMaxHeight};
 					overflow-y: auto;
 					padding-bottom: 14px;
 				}
@@ -361,13 +360,13 @@ function addStyle() {
 		textContent += `
 
 			${mainViewSelector} div.rm-embed__content {
-				max-height: ${blockEmbedMaxHeight}vh;
+				max-height: ${blockEmbedMaxHeight};
 				overflow-y: auto;
 				padding-left: 6px;
 			}
 
 			${sidebarSelector} div.rm-embed__content {
-				max-height: ${blockEmbedMaxHeight}vh;
+				max-height: ${blockEmbedMaxHeight};
 				overflow-y: auto;
 				padding-left: 6px;
 			}
@@ -380,11 +379,11 @@ function addStyle() {
 			/* setting: codeBlockScrollbarWidth */
 
 			${mainViewSelector} div.cm-scroller::-webkit-scrollbar {
-				width: ${codeBlockScrollbarWidth}px;
+				width: ${codeBlockScrollbarWidth};
 			}
 
 			${sidebarSelector} div.cm-scroller::-webkit-scrollbar {
-				width: ${codeBlockScrollbarWidth}px;
+				width: ${codeBlockScrollbarWidth};
 			}
 		`;
 	}
@@ -395,12 +394,12 @@ function addStyle() {
 			/* setting: codeBlockMaxHeight */
 
 			${mainViewSelector} div.cm-editor {
-				max-height: ${codeBlockMaxHeight}vh;
+				max-height: ${codeBlockMaxHeight};
 				overflow-y: auto;
 			}
 
 			${sidebarSelector} div.cm-editor {
-				max-height: ${codeBlockMaxHeight}vh;
+				max-height: ${codeBlockMaxHeight};
 				overflow-y: auto;
 			}
 		`;
