@@ -9,24 +9,59 @@ The default Roam theme [doesn't show scrollbars](https://github.com/paulovieira/
 - set the scrollbar width and maximum height of block embeds and page embeds
 	- for block embeds, you can optionally make the scroll start only in the children (of the block being embeded)
 
-The following screenshots gives a before/after overview. In the right image notice the scrollbars in the main view and sidebar, and the height of the block embed and code block. In this case the settings "maximum height" were configured with "30%" (a percentage of the screen height). However you also can disable this feature.
+
+## Before/after screenshots
+
+Click the images below to see an overview of the changes produced by this extension. Some observations about the "after" image:
+
+- the main view and sidebar now have scrollbars;
+- the small block embeds and code blocks have not changed (no need for a scrollbar there);
+- the big block embeds and code blocks now have a maximum height (that is, if their contents is big enough, the height is limited and a scrollbar for them is shown);
+
+In this case the "maximum height" settings were configured with "30vh" (a percentage of the viewport height). However you can disable this feature.
 
 <p align="center">
 	<img 
-		alt="Default Roam theme without the scrollbars plugin" 
-		title="Default Roam theme without the scrollbars plugin" 
+		alt="Default Roam theme without the scrollbars extension" 
+		title="Default Roam theme without the scrollbars extension" 
 		src="https://user-images.githubusercontent.com/2184309/187561666-418598c2-adf3-4e92-a90b-a61ebb1944e8.jpg" 
-		width="47%"
+		width="46%"
+		data-comment="46% width and 2 nbsp seems to be the best for 2 side-by-side images"
 	>
-	&nbsp; &nbsp; 
+	&nbsp;&nbsp;
 	<img 
-		alt="Default Roam theme with the scrollbars plugin" 
-		title="Default Roam theme with the scrollbars plugin" 
+		alt="Default Roam theme with the scrollbars extension" 
+		title="Default Roam theme with the scrollbars extension" 
 		src="https://user-images.githubusercontent.com/2184309/187560809-ee9fb2a7-1363-4aa7-86c9-97b3ab16bf40.jpg" 
-		width="47%"
+		width="46%"
+		data-comment="46% width and 2 nbsp seems to be the best for 2 side-by-side images"
 	>
 </p>
 
+<br>
+<br>
+
+Another example:
+
+<p align="center">
+	<img 
+		alt="Default Roam theme without the scrollbars extension" 
+		title="Default Roam theme without the scrollbars extension" 
+		src="https://user-images.githubusercontent.com/2184309/188215238-29d1ab2e-a3bd-4f0e-814b-0779c6d374f4.jpg" 
+		width="46%"
+		data-comment="46% width and 2 nbsp seems to be the best for 2 side-by-side images"
+	>
+	&nbsp;&nbsp;
+	<img 
+		alt="Default Roam theme with the scrollbars extension" 
+		title="Default Roam theme with the scrollbars extension" 
+		src="https://user-images.githubusercontent.com/2184309/188215271-df506a7f-a156-4394-916f-bf42b5d27d02.jpg" 
+		width="46%"
+		data-comment="46% width and 2 nbsp seems to be the best for 2 side-by-side images"
+	>
+</p>
+
+Here we have the browser window resized to take half of the screen height. After the extension is loaded we can see some changes in the Shortcuts / Starred pages list and in the search results. Having a scrollbar in the search results is useful to give a hint that there are more results than what is shown. Once again, this features can be disabled.
 
 ## Using with custom themes
 
@@ -41,6 +76,7 @@ All settings/features in this extension can be disabled. When the "disabled" opt
 ## Future improvements
 
 - the controls in the settings panel look ugly because of the long descriptions; can we have more control there? how are other extesions doing this?
-- detect if the plugin is being loaded in the mobile app in android, and if necessary, don't add the stylesheet (?)
+- [DONE] detect if the extension is being loaded in the mobile app in android, and if necessary, don't add the stylesheet (?)
+	- conclusion: in the mobile app, the extension also needs to be loaded; native scrollbars don't work there...
 - check if the other types of embeds can also benefit from max-height + scrollbar: PDF embed, Website embed, etc
 - what else can be improved? feedback is welcome!
