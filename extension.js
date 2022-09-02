@@ -12,6 +12,7 @@ internals.unloadHandlers = [];
 internals.settingsCached = {
 	mainViewScrollbarWidth: null,
 	searchResultsScrollbarWidth: null,
+	starredPagesScrollbarWidth: null,
 
 	blockEmbedScrollbarWidth: null,
 	blockEmbedMaxHeight: null,
@@ -24,6 +25,7 @@ internals.settingsCached = {
 internals.settingsDefault = {
 	mainViewScrollbarWidth: '8px',
 	searchResultsScrollbarWidth: '6px',
+	starredPagesScrollbarWidth: '6px',
 
 	blockEmbedScrollbarWidth: '6px',
 	blockEmbedMaxHeight: '50vh',
@@ -88,7 +90,7 @@ function initializeSettings() {
 
 	panelConfig.settings.push({
 		id: 'mainViewScrollbarWidth',
-		name: 'Main view and sidebar: scrollbar width (px)',
+		name: 'Main view and sidebar: scrollbar width',
 		description: `
 			Values between 8 and 12 should be good for most people. 
 			Set to "disabled" to refrain from adding any css related to this feature (the css from the current theme will then be used).
@@ -100,11 +102,11 @@ function initializeSettings() {
 		},
 	});
 
-	// options for main view and sidebar
+	// options for search results list
 
 	panelConfig.settings.push({
 		id: 'searchResultsScrollbarWidth',
-		name: 'Search results: scrollbar width (px)',
+		name: 'Search results: scrollbar width',
 		description: `
 			Width of scrollbar in the search results dropdown. 
 			Set to "disabled" to refrain from adding any css related to this feature (the css from the current theme will then be used).
@@ -113,6 +115,22 @@ function initializeSettings() {
 			type: 'select',
 			items: ['disabled', '1px', '2px', '3px', '4px', '5px', '6px', '7px', '8px', '9px', '10px', '12px', '14px', '16px'],
 			onChange: value => { updateSettingsCached({ key: 'searchResultsScrollbarWidth', value }); resetStyle(); },
+		},
+	});
+
+	// options for starred pages list
+
+	panelConfig.settings.push({
+		id: 'starredPagesScrollbarWidth',
+		name: 'Starred pages: scrollbar width',
+		description: `
+			Width of scrollbar in the starred pages list. 
+			Set to "disabled" to refrain from adding any css related to this feature (the css from the current theme will then be used).
+		`,
+		action: {
+			type: 'select',
+			items: ['disabled', '1px', '2px', '3px', '4px', '5px', '6px', '7px', '8px', '9px', '10px', '12px', '14px', '16px'],
+			onChange: value => { updateSettingsCached({ key: 'starredPagesScrollbarWidth', value }); resetStyle(); },
 		},
 	});
 
@@ -253,16 +271,13 @@ function addStyle() {
 	log('addStyle');
 
 	let textContent = '';
-	let { mainViewScrollbarWidth, searchResultsScrollbarWidth } = internals.settingsCached;
+	let { mainViewScrollbarWidth, searchResultsScrollbarWidth, starredPagesScrollbarWidth } = internals.settingsCached;
 	let { blockEmbedScrollbarWidth, blockEmbedMaxHeight, blockEmbedScrollOnChildren } = internals.settingsCached;
 	let { codeBlockScrollbarWidth, codeBlockMaxHeight } = internals.settingsCached;
 
 	const mainViewSelector = 'div.rm-article-wrapper';
 	const sidebarSelector = 'div#roam-right-sidebar-content';
-	const searchListSelector = 'div.rm-find-or-create-wrapper';
 	const graphListSelector = 'div.rm-graphs__search + div.scroll';
-	const starredPagesListSelector = 'div.starred-pages';
-	const settingssTabSelector = 'div.rm-settings > div.rm-settings-tabs > div.bp3-tab-list';
 
 	if (mainViewScrollbarWidth !== 'disabled') {
 		textContent += `
@@ -283,24 +298,6 @@ function addStyle() {
 				width: ${mainViewScrollbarWidth};
 			}
 
-			/* for starred pages re-use the color from .rm-settings; see issue #1; */
-
-			${starredPagesListSelector}::-webkit-scrollbar {
-				width: ${mainViewScrollbarWidth};
-				background: #293742;
-			}
-
-			${starredPagesListSelector}::-webkit-scrollbar-thumb {
-				background-color: #8A9BA8;
-			}
-
-			/* fix for the settings tab ("User", "Sharing", "Files", etc); hopefully this will be fixed in the default css */
-
-			${settingssTabSelector} {
-				overflow: auto;
-			}
-
-
 			/* firefox only: https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Scrollbars */
 			/* color taken from the default theme - see https://roamresearch.com/assets/css/re-com/re-com.min.css */
 			/* for starred pages re-use the color from .rm-settings; see issue #1; */
@@ -320,15 +317,17 @@ function addStyle() {
 				scrollbar-color: rgba(0,0,0,.25) transparent;
 			}
 
-			${starredPagesListSelector} {
-				scrollbar-width: ${parseInt(mainViewScrollbarWidth, 10) <= 8 ? 'thin' : 'auto' };
-				scrollbar-color: #293742 #8A9BA8;
-			}
+			/* EXTRA FIX: the settings tab ("User", "Sharing", "Files", etc) is not scrollable; hopefully this will be fixed upstream; */
 
+			div.rm-settings > div.rm-settings-tabs > div.bp3-tab-list {
+				overflow: auto;
+			}
 		`;
 	}
 
 	if (searchResultsScrollbarWidth !== 'disabled') {
+		const searchListSelector = 'div.rm-find-or-create-wrapper';
+
 		textContent += `
 
 			/* setting: searchResultsScrollbarWidth */
@@ -348,6 +347,31 @@ function addStyle() {
 
 			${searchListSelector} ul.rm-find-or-create__menu {
 				max-height: min(calc(80vh - 10px), 400px);
+			}
+		`;
+	}
+
+	if (starredPagesScrollbarWidth !== 'disabled') {
+		const starredPagesListSelector = 'div.starred-pages';
+
+		textContent += `
+
+			/* setting: starredPagesScrollbarWidth */
+
+			/* re-use the scrollbar colors used in .rm-settings; see issue #1; */
+
+			${starredPagesListSelector}::-webkit-scrollbar {
+				width: ${starredPagesScrollbarWidth};
+				background: #293742;
+			}
+
+			${starredPagesListSelector}::-webkit-scrollbar-thumb {
+				background-color: #8A9BA8;
+			}
+
+			${starredPagesListSelector} {
+				scrollbar-width: ${parseInt(starredPagesScrollbarWidth, 10) <= 8 ? 'thin' : 'auto' };
+				scrollbar-color: #293742 #8A9BA8;
 			}
 		`;
 	}
