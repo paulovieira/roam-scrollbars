@@ -6,7 +6,6 @@ internals.extensionId = 'roam-scrollbars';
 // example: https://roamresearch.com?dev=true/#/app/<GRAPH_NAME>
 
 internals.isDev = String(new URLSearchParams(window.location.search).get('dev')).includes('true');
-internals.isProd = !internals.isDev;
 internals.extensionAPI = null;
 internals.unloadHandlers = [];
 
@@ -67,7 +66,9 @@ function main() {
 
 function log() {
 	
-	if (internals.isProd) { return }
+	let isProd = !internals.isDev;
+
+	if (isProd) { return }
 
 	console.log(`${internals.extensionId} ${Date.now()}]`, ...arguments);
 }
@@ -77,7 +78,7 @@ function initializeSettings() {
 	log('initializeSettings');
 
 	let panelConfig = {
-		tabTitle: 'Scrollbars',
+		tabTitle: `Scrollbars${internals.isDev ? ' (dev)' : ''}`,
 		settings: []
 	};
 
@@ -215,7 +216,7 @@ function resetStyle() {
 
 	// use setTimeout to make sure our css styles are loaded after styles from other extensions
 
-	setTimeout(addStyle, 100);  
+	setTimeout(addStyle, internals.isDev ? 200 : 100);  
 }
 
 function removeStyle() {
@@ -240,11 +241,17 @@ function addStyle() {
 
 	const mainViewSelector = 'div.rm-article-wrapper';
 	const sidebarSelector = 'div#roam-right-sidebar-content';
+	const graphListSelector = 'div.rm-graphs__search + div.scroll';
+	const starredPagesListSelector = 'div.starred-pages';
+	const settingssTabSelector = 'div.rm-settings > div.rm-settings-tabs > div.bp3-tab-list';
+	const searchListSelector = 'div.rm-find-or-create-wrapper';
 
 	if (mainViewScrollbarWidth !== 'disabled') {
 		textContent += `
 
 			/* setting: mainViewScrollbarWidth */
+
+			/* chrome and safari */
 
 			${mainViewSelector}::-webkit-scrollbar {
 				width: ${mainViewScrollbarWidth};
@@ -254,17 +261,68 @@ function addStyle() {
 				width: ${mainViewScrollbarWidth};
 			}
 
-			/* firefox only; reference: https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Scrollbars */
+			${graphListSelector}::-webkit-scrollbar {
+				width: ${mainViewScrollbarWidth};
+			}
+
+			${searchListSelector} ul.rm-find-or-create__menu::-webkit-scrollbar {
+				width: ${mainViewScrollbarWidth};
+			}
+
+			/* improve the search results list in a small viewport */
+
+			${searchListSelector} ul.rm-find-or-create__menu {
+				max-height: min(calc(80vh - 10px), 400px);
+			}
+
+			/* give a little space between the input and the results list */
+
+			${searchListSelector} div.bp3-transition-container {
+				top: 6px !important;
+			}
+
+			/* for starred pages re-use the color from .rm-settings; see issue #1; */
+
+			${starredPagesListSelector}::-webkit-scrollbar {
+				width: ${mainViewScrollbarWidth};
+				background: #293742;
+			}
+
+			${starredPagesListSelector}::-webkit-scrollbar-thumb {
+				background-color: #8A9BA8;
+			}
+
+
+
+			/* firefox only: https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Scrollbars */
 			/* color taken from the default theme - see https://roamresearch.com/assets/css/re-com/re-com.min.css */
+			/* for starred pages re-use the color from .rm-settings; see issue #1; */
 
 			${mainViewSelector} {
-				scrollbar-width: ${Number(mainViewScrollbarWidth) <= 6 ? 'thin' : 'auto' };
+				scrollbar-width: ${parseInt(mainViewScrollbarWidth, 10) <= 8 ? 'thin' : 'auto' };
 				scrollbar-color: rgba(0,0,0,.25) transparent;
 			}
 
 			${sidebarSelector} {
-				scrollbar-width: ${Number(mainViewScrollbarWidth) <= 6 ? 'thin' : 'auto' };
+				scrollbar-width: ${parseInt(mainViewScrollbarWidth, 10) <= 8 ? 'thin' : 'auto' };
 				scrollbar-color: rgba(0,0,0,.25) transparent;
+			}
+
+			${graphListSelector} {
+				scrollbar-width: ${parseInt(mainViewScrollbarWidth, 10) <= 8 ? 'thin' : 'auto' };
+				scrollbar-color: rgba(0,0,0,.25) transparent;
+			}
+
+			${starredPagesListSelector} {
+				scrollbar-width: ${parseInt(mainViewScrollbarWidth, 10) <= 8 ? 'thin' : 'auto' };
+				scrollbar-color: #293742 #8A9BA8;
+			}
+
+
+			/* fix for the settings tab ("User", "Sharing", "Files", etc); hopefully this will be fixed in the default css */
+
+			${settingssTabSelector} {
+				overflow: auto;
 			}
 		`;
 	}
@@ -410,6 +468,7 @@ function addStyle() {
 	extensionStyle.textContent = textContent;
 	extensionStyle.dataset.id = `${internals.extensionId}-${Date.now()}`;
 	extensionStyle.dataset.title = `dynamic styles added by the ${internals.extensionId} extension`;
+	extensionStyle.dataset.isDev = String(internals.isDev);
 
 	document.head.appendChild(extensionStyle);
 }
