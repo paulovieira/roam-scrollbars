@@ -11,6 +11,7 @@ internals.unloadHandlers = [];
 
 internals.settingsCached = {
 	mainViewScrollbarWidth: null,
+	searchResultsScrollbarWidth: null,
 
 	blockEmbedScrollbarWidth: null,
 	blockEmbedMaxHeight: null,
@@ -22,6 +23,7 @@ internals.settingsCached = {
 
 internals.settingsDefault = {
 	mainViewScrollbarWidth: '8px',
+	searchResultsScrollbarWidth: '6px',
 
 	blockEmbedScrollbarWidth: '6px',
 	blockEmbedMaxHeight: '50vh',
@@ -93,8 +95,24 @@ function initializeSettings() {
 		`,
 		action: {
 			type: 'select',
-			items: ['disabled', '1px', '2px', '3px', '4px', '5px', '6px', '7px', '8px', '9px', '10px', '12px', '14px', '16px', '18px', '20px'],
+			items: ['disabled', '1px', '2px', '3px', '4px', '5px', '6px', '7px', '8px', '9px', '10px', '12px', '14px', '16px'],
 			onChange: value => { updateSettingsCached({ key: 'mainViewScrollbarWidth', value }); resetStyle(); },
+		},
+	});
+
+	// options for main view and sidebar
+
+	panelConfig.settings.push({
+		id: 'searchResultsScrollbarWidth',
+		name: 'Search results: scrollbar width (px)',
+		description: `
+			Width of scrollbar in the search results dropdown. 
+			Set to "disabled" to refrain from adding any css related to this feature (the css from the current theme will then be used).
+		`,
+		action: {
+			type: 'select',
+			items: ['disabled', '1px', '2px', '3px', '4px', '5px', '6px', '7px', '8px', '9px', '10px', '12px', '14px', '16px'],
+			onChange: value => { updateSettingsCached({ key: 'searchResultsScrollbarWidth', value }); resetStyle(); },
 		},
 	});
 
@@ -111,7 +129,7 @@ function initializeSettings() {
 		`,
 		action: {
 			type: 'select',
-			items: ['disabled', '1px', '2px', '3px', '4px', '5px', '6px', '7px', '8px', '9px', '10px', '12px', '14px', '16px', '18px', '20px'],
+			items: ['disabled', '1px', '2px', '3px', '4px', '5px', '6px', '7px', '8px', '9px', '10px', '12px', '14px', '16px'],
 			onChange: value => { updateSettingsCached({ key: 'blockEmbedScrollbarWidth', value }); resetStyle(); },
 		},
 	});
@@ -157,7 +175,7 @@ function initializeSettings() {
 		`,
 		action: {
 			type: 'select',
-			items: ['disabled', '1px', '2px', '3px', '4px', '5px', '6px', '7px', '8px', '9px', '10px', '12px', '14px', '16px', '18px', '20px'],
+			items: ['disabled', '1px', '2px', '3px', '4px', '5px', '6px', '7px', '8px', '9px', '10px', '12px', '14px', '16px'],
 			onChange: value => { updateSettingsCached({ key: 'codeBlockScrollbarWidth', value }); resetStyle(); },
 		},
 	});
@@ -235,16 +253,16 @@ function addStyle() {
 	log('addStyle');
 
 	let textContent = '';
-	let { mainViewScrollbarWidth } = internals.settingsCached;
+	let { mainViewScrollbarWidth, searchResultsScrollbarWidth } = internals.settingsCached;
 	let { blockEmbedScrollbarWidth, blockEmbedMaxHeight, blockEmbedScrollOnChildren } = internals.settingsCached;
 	let { codeBlockScrollbarWidth, codeBlockMaxHeight } = internals.settingsCached;
 
 	const mainViewSelector = 'div.rm-article-wrapper';
 	const sidebarSelector = 'div#roam-right-sidebar-content';
+	const searchListSelector = 'div.rm-find-or-create-wrapper';
 	const graphListSelector = 'div.rm-graphs__search + div.scroll';
 	const starredPagesListSelector = 'div.starred-pages';
 	const settingssTabSelector = 'div.rm-settings > div.rm-settings-tabs > div.bp3-tab-list';
-	const searchListSelector = 'div.rm-find-or-create-wrapper';
 
 	if (mainViewScrollbarWidth !== 'disabled') {
 		textContent += `
@@ -265,22 +283,6 @@ function addStyle() {
 				width: ${mainViewScrollbarWidth};
 			}
 
-			${searchListSelector} ul.rm-find-or-create__menu::-webkit-scrollbar {
-				width: ${mainViewScrollbarWidth};
-			}
-
-			/* improve the search results list in a small viewport */
-
-			${searchListSelector} ul.rm-find-or-create__menu {
-				max-height: min(calc(80vh - 10px), 400px);
-			}
-
-			/* give a little space between the input and the results list */
-
-			${searchListSelector} div.bp3-transition-container {
-				top: 6px !important;
-			}
-
 			/* for starred pages re-use the color from .rm-settings; see issue #1; */
 
 			${starredPagesListSelector}::-webkit-scrollbar {
@@ -292,6 +294,11 @@ function addStyle() {
 				background-color: #8A9BA8;
 			}
 
+			/* fix for the settings tab ("User", "Sharing", "Files", etc); hopefully this will be fixed in the default css */
+
+			${settingssTabSelector} {
+				overflow: auto;
+			}
 
 
 			/* firefox only: https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Scrollbars */
@@ -318,11 +325,29 @@ function addStyle() {
 				scrollbar-color: #293742 #8A9BA8;
 			}
 
+		`;
+	}
 
-			/* fix for the settings tab ("User", "Sharing", "Files", etc); hopefully this will be fixed in the default css */
+	if (searchResultsScrollbarWidth !== 'disabled') {
+		textContent += `
 
-			${settingssTabSelector} {
-				overflow: auto;
+			/* setting: searchResultsScrollbarWidth */
+
+			${searchListSelector} ul.rm-find-or-create__menu::-webkit-scrollbar {
+				width: ${searchResultsScrollbarWidth};
+				/* TODO: scrollbar-width */
+			}
+
+			/* give a little space between the input and the results list */
+
+			${searchListSelector} div.bp3-transition-container {
+				top: 6px !important;
+			}
+
+			/* improvements for search results in small viewports */
+
+			${searchListSelector} ul.rm-find-or-create__menu {
+				max-height: min(calc(80vh - 10px), 400px);
 			}
 		`;
 	}
@@ -335,10 +360,12 @@ function addStyle() {
 
 				${mainViewSelector} div.rm-embed-inner-block-hide > div.roam-block-container > div.rm-level-1::-webkit-scrollbar {
 					width: ${blockEmbedScrollbarWidth};
+					/* TODO: scrollbar-width */
 				}
 
 				${sidebarSelector} div.rm-embed-inner-block-hide > div.roam-block-container > div.rm-level-1::-webkit-scrollbar {
 					width: ${blockEmbedScrollbarWidth};
+					/* TODO: scrollbar-width */
 				}
 			`;
 		}
@@ -349,24 +376,28 @@ function addStyle() {
 
 				${mainViewSelector} div.rm-embed-inner-block-hide > div.roam-block-container::-webkit-scrollbar {
 					width: ${blockEmbedScrollbarWidth};
+					/* TODO: scrollbar-width */
 				}
 
 				${sidebarSelector} div.rm-embed-inner-block-hide > div.roam-block-container::-webkit-scrollbar {
 					width: ${blockEmbedScrollbarWidth};
+					/* TODO: scrollbar-width */
 				}
 			`;
 		}
 
-		// for page embeds the only place that seems to work is here
+		// for page embeds the only place that seems to work is here; the "scroll on children" option is not available;
 
 		textContent += `
 
 			${mainViewSelector} div.rm-embed__content::-webkit-scrollbar {
 				width: ${blockEmbedScrollbarWidth};
+				/* TODO: scrollbar-width */
 			}
 
 			${sidebarSelector} div.rm-embed__content::-webkit-scrollbar {
 				width: ${blockEmbedScrollbarWidth};
+				/* TODO: scrollbar-width */
 			}
 		`;
 	}
@@ -438,10 +469,12 @@ function addStyle() {
 
 			${mainViewSelector} div.cm-scroller::-webkit-scrollbar {
 				width: ${codeBlockScrollbarWidth};
+				/* TODO: scrollbar-width */
 			}
 
 			${sidebarSelector} div.cm-scroller::-webkit-scrollbar {
 				width: ${codeBlockScrollbarWidth};
+				/* TODO: scrollbar-width */
 			}
 		`;
 	}
