@@ -352,7 +352,7 @@ function addStyle() {
 
 			${starredPagesListSelector}::-webkit-scrollbar {
 				width: ${starredPagesScrollbarWidth};
-				background: #293742;
+				background-color: #293742;
 			}
 
 			${starredPagesListSelector}::-webkit-scrollbar-thumb {
@@ -363,6 +363,7 @@ function addStyle() {
 				scrollbar-width: ${getCssValue('scrollbar-width', { width: starredPagesScrollbarWidth })};
 				scrollbar-color: #293742 #8A9BA8;
 			}
+
 		`;
 	}
 
@@ -382,7 +383,6 @@ function addStyle() {
 					scrollbar-color: ${getCssValue('scrollbar-color')};
 				}
 
-
 			`;
 
 			textContent += cssForMainView;
@@ -391,7 +391,7 @@ function addStyle() {
 		else {
 			const cssForMainView = `
 
-				/* SETTING: blockEmbedScrollbarWidth */
+				/* SETTING: "Block embeds: scrollbar width" */
 
 				${mainViewSelector} div.rm-embed-inner-block-hide > div.roam-block-container::-webkit-scrollbar {
 					width: ${blockEmbedScrollbarWidth};
@@ -401,6 +401,7 @@ function addStyle() {
 					scrollbar-width: ${getCssValue('scrollbar-width', { width: blockEmbedScrollbarWidth })};
 					scrollbar-color: ${getCssValue('scrollbar-color')};
 				}
+
 			`;
 
 			textContent += cssForMainView;
@@ -453,6 +454,7 @@ function addStyle() {
 				div.rm-embed-container {
 					border: 1px solid #dfe5e9;
 				}
+
 			`;
 
 			textContent += cssForMainView;
@@ -476,6 +478,7 @@ function addStyle() {
 				div.rm-embed-container {
 					border: 1px solid #dfe5e9;
 				}
+
 			`;
 
 			textContent += cssForMainView;
@@ -503,6 +506,7 @@ function addStyle() {
 				div.rm-embed-container {
 					border: 1px solid #dfe5e9;
 				}
+
 			`;
 
 			textContent += cssForMainView;
@@ -525,10 +529,6 @@ function addStyle() {
 				scrollbar-color: ${getCssValue('scrollbar-color')};
 			}
 
-			div.rm-code-block {
-				border: 1px solid #e9e9e9;
-			}
-			
 		`;
 
 		textContent += cssForMainView;
@@ -548,9 +548,12 @@ function addStyle() {
 			/* add a subtle border color to the container (5% shade relative to the default background color, #f5f5f5);
 				generated with this tool: https://noeldelgado.github.io/shadowlord */
 
-			div.rm-code-block,
-			div.rm-code-block__settings-bar {
+			div.rm-code-block {
 				border: 1px solid #e9e9e9;
+			}
+
+			div.rm-code-block__settings-bar {
+				border-top: 1px solid #e9e9e9;
 			}
 
 		`;
