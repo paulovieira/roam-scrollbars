@@ -7,7 +7,6 @@ internals.extensionId = 'roam-scrollbars';
 
 internals.isDev = String(new URLSearchParams(window.location.search).get('dev')).includes('true');
 internals.extensionAPI = null;
-internals.unloadHandlers = [];
 
 internals.settingsCached = {
 	mainViewScrollbarWidth: null,
@@ -40,8 +39,9 @@ function onload({ extensionAPI }) {
 	log('ONLOAD (start)');
 
 	internals.extensionAPI = extensionAPI;
+
 	initializeSettings();
-	main();
+	resetStyle();
 
 	log('ONLOAD (end)');
 }
@@ -50,22 +50,9 @@ function onunload() {
 
 	log('ONUNLOAD (start)');
 
-	internals.unloadHandlers.forEach(unloadHandler => { unloadHandler() })
+	removeStyle();
 
 	log('ONUNLOAD (end)');
-}
-
-function main() {
-	
-	resetStyle();
-
-	let unloadHandler = () => { 
-
-		log('unloadHandler');
-		removeStyle();
-	};
-
-	internals.unloadHandlers.push(unloadHandler);
 }
 
 function log() {
@@ -98,7 +85,7 @@ function initializeSettings() {
 		action: {
 			type: 'select',
 			items: ['disabled', '1px', '2px', '3px', '4px', '5px', '6px', '7px', '8px', '9px', '10px', '12px', '14px', '16px'],
-			onChange: value => { updateSettingsCached({ key: 'mainViewScrollbarWidth', value }); resetStyle(); },
+			onChange: value => { updateSettingsCached({ key: 'mainViewScrollbarWidth', value }) },
 		},
 	});
 
@@ -114,7 +101,7 @@ function initializeSettings() {
 		action: {
 			type: 'select',
 			items: ['disabled', '1px', '2px', '3px', '4px', '5px', '6px', '7px', '8px', '9px', '10px', '12px', '14px', '16px'],
-			onChange: value => { updateSettingsCached({ key: 'searchResultsScrollbarWidth', value }); resetStyle(); },
+			onChange: value => { updateSettingsCached({ key: 'searchResultsScrollbarWidth', value }) },
 		},
 	});
 
@@ -130,7 +117,7 @@ function initializeSettings() {
 		action: {
 			type: 'select',
 			items: ['disabled', '1px', '2px', '3px', '4px', '5px', '6px', '7px', '8px', '9px', '10px', '12px', '14px', '16px'],
-			onChange: value => { updateSettingsCached({ key: 'starredPagesScrollbarWidth', value }); resetStyle(); },
+			onChange: value => { updateSettingsCached({ key: 'starredPagesScrollbarWidth', value }) },
 		},
 	});
 
@@ -148,7 +135,7 @@ function initializeSettings() {
 		action: {
 			type: 'select',
 			items: ['disabled', '1px', '2px', '3px', '4px', '5px', '6px', '7px', '8px', '9px', '10px', '12px', '14px', '16px'],
-			onChange: value => { updateSettingsCached({ key: 'codeBlockScrollbarWidth', value }); resetStyle(); },
+			onChange: value => { updateSettingsCached({ key: 'codeBlockScrollbarWidth', value }) },
 		},
 	});
 
@@ -162,7 +149,7 @@ function initializeSettings() {
 		action: {
 			type: 'select',
 			items: ['disabled', '20vh', '30vh', '40vh', '50vh', '60vh', '70vh', '80vh', '90vh', '100vh'],
-			onChange: value => { updateSettingsCached({ key: 'codeBlockMaxHeight', value }); resetStyle(); },
+			onChange: value => { updateSettingsCached({ key: 'codeBlockMaxHeight', value }) },
 		},
 	});
 
@@ -180,7 +167,7 @@ function initializeSettings() {
 		action: {
 			type: 'select',
 			items: ['disabled', '1px', '2px', '3px', '4px', '5px', '6px', '7px', '8px', '9px', '10px', '12px', '14px', '16px'],
-			onChange: value => { updateSettingsCached({ key: 'blockEmbedScrollbarWidth', value }); resetStyle(); },
+			onChange: value => { updateSettingsCached({ key: 'blockEmbedScrollbarWidth', value }) },
 		},
 	});
 
@@ -195,7 +182,7 @@ function initializeSettings() {
 		action: {
 			type: 'select',
 			items: ['disabled', '10vh', '20vh', '30vh', '40vh', '50vh', '60vh', '70vh', '80vh', '90vh', '100vh'],
-			onChange: value => { updateSettingsCached({ key: 'blockEmbedMaxHeight', value }); resetStyle(); },
+			onChange: value => { updateSettingsCached({ key: 'blockEmbedMaxHeight', value }) },
 		},
 	});
 
@@ -208,7 +195,7 @@ function initializeSettings() {
 		`,
 		action: {
 			type: 'switch',
-			onChange: ev => { updateSettingsCached({ key: 'blockEmbedScrollOnChildren', value: ev.target.checked }); resetStyle(); },
+			onChange: ev => { updateSettingsCached({ key: 'blockEmbedScrollOnChildren', value: ev.target.checked }) },
 		},
 	});
 
@@ -230,13 +217,19 @@ function initializeSettings() {
 			extensionAPI.settings.set(key, value);
 		}
 		
-		updateSettingsCached({ key, value });
+		updateSettingsCached({ key, value, resetStyle: false });
 	});
 }
 
-function updateSettingsCached({ key, value }) {
+function updateSettingsCached({ key, value, resetStyle: _resetStyle }) {
 
 	internals.settingsCached[key] = value;
+
+	// styles are reseted here, unless we explicitly turn it off
+
+	if (_resetStyle !== false) {
+		resetStyle();
+	}
 
 	log('updateSettingsCached', { key, value, 'internals.settingsCached': internals.settingsCached });
 }
