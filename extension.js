@@ -14,12 +14,12 @@ internals.settingsCached = {
 	searchResultsScrollbarWidth: null,
 	starredPagesScrollbarWidth: null,
 
+	codeBlockScrollbarWidth: null,
+	codeBlockMaxHeight: null,
+
 	blockEmbedScrollbarWidth: null,
 	blockEmbedMaxHeight: null,
 	blockEmbedScrollOnChildren: null,
-
-	codeBlockScrollbarWidth: null,
-	codeBlockMaxHeight: null,
 };
 
 internals.settingsDefault = {
@@ -27,12 +27,12 @@ internals.settingsDefault = {
 	searchResultsScrollbarWidth: '6px',
 	starredPagesScrollbarWidth: '6px',
 
+	codeBlockScrollbarWidth: '6px',
+	codeBlockMaxHeight: '50vh',
+
 	blockEmbedScrollbarWidth: '6px',
 	blockEmbedMaxHeight: '50vh',
 	blockEmbedScrollOnChildren: false,
-
-	codeBlockScrollbarWidth: '6px',
-	codeBlockMaxHeight: '50vh',
 };
 
 function onload({ extensionAPI }) {
@@ -134,6 +134,38 @@ function initializeSettings() {
 		},
 	});
 
+	// options for code blocks
+
+	panelConfig.settings.push({
+		id: 'codeBlockScrollbarWidth',
+		name: 'Code blocks: scrollbar width',
+		description: `
+			By default Roam will not show any scrollbars in code blocks (even for long code blocks, where the default maximum height of 1000px is reached). 
+			Use this setting if you prefer to actually have a scrollbar in code blocks (visible only when the max-height is reached). Use the next setting to customize the respective max-height.
+			Set to "disabled" to refrain from adding any css related to this feature (the css from the current theme will then be used).
+			TIP: having this width smaller than the width of the main view is a good choice.
+		`,
+		action: {
+			type: 'select',
+			items: ['disabled', '1px', '2px', '3px', '4px', '5px', '6px', '7px', '8px', '9px', '10px', '12px', '14px', '16px'],
+			onChange: value => { updateSettingsCached({ key: 'codeBlockScrollbarWidth', value }); resetStyle(); },
+		},
+	});
+
+	panelConfig.settings.push({
+		id: 'codeBlockMaxHeight',
+		name: 'Code blocks: maximum height',
+		description: `
+			Roam has a default maximum height of 1000px for code blocks (that's around 48 lines of code). However, it might be convenient to change the unit of that max-height from pixels (absolute unit) to a percentage of the viewport height (relative unit). This is useful to quickly see the beginning/end of the code block in relation to the surrounding blocks, regardless of the sizes of the code block and screen. A subtle border is also added to the code block container.
+			Set to "disabled" to refrain from adding any css related to this feature (the css from the current theme will then be used).
+		`,
+		action: {
+			type: 'select',
+			items: ['disabled', '20vh', '30vh', '40vh', '50vh', '60vh', '70vh', '80vh', '90vh', '100vh'],
+			onChange: value => { updateSettingsCached({ key: 'codeBlockMaxHeight', value }); resetStyle(); },
+		},
+	});
+
 	// options for block embeds
 
 	panelConfig.settings.push({
@@ -177,38 +209,6 @@ function initializeSettings() {
 		action: {
 			type: 'switch',
 			onChange: ev => { updateSettingsCached({ key: 'blockEmbedScrollOnChildren', value: ev.target.checked }); resetStyle(); },
-		},
-	});
-
-	// options for code blocks
-
-	panelConfig.settings.push({
-		id: 'codeBlockScrollbarWidth',
-		name: 'Code blocks: scrollbar width',
-		description: `
-			By default Roam will not show any scrollbars in code blocks (even for long code blocks, where the default maximum height of 1000px is reached). 
-			Use this setting if you prefer to actually have a scrollbar in code blocks (visible only when the max-height is reached). Use the next setting to customize the respective max-height.
-			Set to "disabled" to refrain from adding any css related to this feature (the css from the current theme will then be used).
-			TIP: having this width smaller than the width of the main view is a good choice.
-		`,
-		action: {
-			type: 'select',
-			items: ['disabled', '1px', '2px', '3px', '4px', '5px', '6px', '7px', '8px', '9px', '10px', '12px', '14px', '16px'],
-			onChange: value => { updateSettingsCached({ key: 'codeBlockScrollbarWidth', value }); resetStyle(); },
-		},
-	});
-
-	panelConfig.settings.push({
-		id: 'codeBlockMaxHeight',
-		name: 'Code blocks: maximum height',
-		description: `
-			Roam has a default maximum height of 1000px for code blocks (that's around 48 lines of code). However, it might be convenient to change the unit of that max-height from pixels (absolute unit) to a percentage of the viewport height (relative unit). This is useful to quickly see the beginning/end of the code block in relation to the surrounding blocks, regardless of the sizes of the code block and screen. A subtle border is also added to the code block container.
-			Set to "disabled" to refrain from adding any css related to this feature (the css from the current theme will then be used).
-		`,
-		action: {
-			type: 'select',
-			items: ['disabled', '20vh', '30vh', '40vh', '50vh', '60vh', '70vh', '80vh', '90vh', '100vh'],
-			onChange: value => { updateSettingsCached({ key: 'codeBlockMaxHeight', value }); resetStyle(); },
 		},
 	});
 
