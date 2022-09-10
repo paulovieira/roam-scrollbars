@@ -138,9 +138,9 @@ function initializeSettings() {
 
 	panelConfig.settings.push({
 		id: 'blockEmbedScrollbarWidth',
-		name: 'Block/page embeds: scrollbar width',
+		name: 'Block embeds: scrollbar width',
 		description: `
-			By default Roam will expand the container of a block/page embed as much as necessary. However when using embeds of "long" blocks/pages (with many children), it might be convenient to have a maximum height for the embed (in which case a scrollbar is necessary). 
+			By default Roam will expand the container of a block embed as much as necessary. However when using embeds of "long" blocks (with many children), it might be convenient to have a maximum height for the embed (in which case a scrollbar is necessary). 
 			This setting is used to define the width of scrollbars in embeds. The next setting is used to define the respective maximum height. 
 			Set to "disabled" to refrain from adding any css related to this feature (the css from the current theme will then be used). 
 			TIP: having this width smaller than the width of the main view is a good choice.
@@ -154,10 +154,10 @@ function initializeSettings() {
 
 	panelConfig.settings.push({
 		id: 'blockEmbedMaxHeight',
-		name: 'Block/page embeds: maximum height',
+		name: 'Block embeds: maximum height',
 		description: `
-			This setting defines a maximum height for block/page embeds. This is useful to quickly see the beginning/end of the embed in relation to the surrounding blocks. 
-			The numeric values are a percentage of the viewport height. 
+			This setting defines a maximum height for block embeds. This is useful to quickly see the beginning/end of the embed in relation to the surrounding blocks. 
+			The numeric values are a percentage of the viewport height. A subtle border is also added to the block embed container.
 			Set to "disabled" to refrain from adding any css related to this feature (the css from the current theme will then be used).
 		`,
 		action: {
@@ -169,9 +169,9 @@ function initializeSettings() {
 
 	panelConfig.settings.push({
 		id: 'blockEmbedScrollOnChildren',
-		name: 'Block/page embeds: scroll only on children',
+		name: 'Block embeds: scroll only on children',
 		description: `
-			If this setting is activated, the scroll happens only on the children of the block/page being embeded. That is, the root block (the one associated to the block reference) will always be visible. The scroll starts only on the children.
+			If this setting is activated, the scroll happens only on the children of the block being embeded. That is, the root block (the one associated to the block reference) will always be visible. The scroll starts only on the children.
 			NOTE: for page embededs, this is the only way to have a scroll. 
 		`,
 		action: {
@@ -186,8 +186,8 @@ function initializeSettings() {
 		id: 'codeBlockScrollbarWidth',
 		name: 'Code blocks: scrollbar width',
 		description: `
-			By default Roam will not show any scrollbars in code blocks (even for long code blocks, where the maximum height of 1000px is reached). 
-			Use this setting if you prefer to actually have a scrollbar in code blocks (visible only when the maximum height is reached). Use the next setting to customize the respective maximum height.
+			By default Roam will not show any scrollbars in code blocks (even for long code blocks, where the default maximum height of 1000px is reached). 
+			Use this setting if you prefer to actually have a scrollbar in code blocks (visible only when the max-height is reached). Use the next setting to customize the respective max-height.
 			Set to "disabled" to refrain from adding any css related to this feature (the css from the current theme will then be used).
 			TIP: having this width smaller than the width of the main view is a good choice.
 		`,
@@ -202,7 +202,7 @@ function initializeSettings() {
 		id: 'codeBlockMaxHeight',
 		name: 'Code blocks: maximum height',
 		description: `
-			By default Roam has a maximum height of 1000px for code blocks (that's around 48 lines of code). However, it might be convenient to change the unit of that maximum height from pixels (absolute) to a percentage of the viewport height (relative). This is useful to quickly see the beginning/end of the code block in relation to the surrounding blocks, regardless of the size of the code block and the size the of screen being used.
+			Roam has a default maximum height of 1000px for code blocks (that's around 48 lines of code). However, it might be convenient to change the unit of that max-height from pixels (absolute unit) to a percentage of the viewport height (relative unit). This is useful to quickly see the beginning/end of the code block in relation to the surrounding blocks, regardless of the sizes of the code block and screen. A subtle border is also added to the code block container.
 			Set to "disabled" to refrain from adding any css related to this feature (the css from the current theme will then be used).
 		`,
 		action: {
@@ -252,7 +252,7 @@ function resetStyle() {
 
 	// use setTimeout to make sure our css styles are loaded after styles from other extensions
 
-	setTimeout(addStyle, internals.isDev ? 200 : 100);  
+	setTimeout(addStyle, internals.isDev ? 200 : 100);
 }
 
 function removeStyle() {
@@ -271,94 +271,91 @@ function addStyle() {
 	log('addStyle');
 
 	let textContent = '';
-	let { mainViewScrollbarWidth, searchResultsScrollbarWidth, starredPagesScrollbarWidth } = internals.settingsCached;
-	let { blockEmbedScrollbarWidth, blockEmbedMaxHeight, blockEmbedScrollOnChildren } = internals.settingsCached;
-	let { codeBlockScrollbarWidth, codeBlockMaxHeight } = internals.settingsCached;
+	let { 
+		mainViewScrollbarWidth,
+		searchResultsScrollbarWidth,
+		starredPagesScrollbarWidth,
+
+		blockEmbedScrollbarWidth,
+		blockEmbedMaxHeight,
+		blockEmbedScrollOnChildren,
+
+		codeBlockScrollbarWidth,
+		codeBlockMaxHeight
+	} = internals.settingsCached;
 
 	const mainViewSelector = 'div.rm-article-wrapper';
 	const sidebarSelector = 'div#roam-right-sidebar-content';
-	const graphListSelector = 'div.rm-graphs__search + div.scroll';
+	
+	// using rgba(0,0,0,.25) for the scrollbar color, which was taken from the default theme:
+	// see https://roamresearch.com/assets/css/re-com/re-com.min.css
+	
+	// for starred pages re-use the color from .rm-settings; see issue #1 for more details;
 
 	if (mainViewScrollbarWidth !== 'disabled') {
-		textContent += `
+		const cssForMainView = `
 
-			/* setting: mainViewScrollbarWidth */
-
-			/* chrome and safari */
+			/* SETTING: "Main view and sidebar: scrollbar width" */
 
 			${mainViewSelector}::-webkit-scrollbar {
 				width: ${mainViewScrollbarWidth};
 			}
 
-			${sidebarSelector}::-webkit-scrollbar {
-				width: ${mainViewScrollbarWidth};
-			}
-
-			${graphListSelector}::-webkit-scrollbar {
-				width: ${mainViewScrollbarWidth};
-			}
-
-			/* firefox only: https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Scrollbars */
-			/* color taken from the default theme - see https://roamresearch.com/assets/css/re-com/re-com.min.css */
-			/* for starred pages re-use the color from .rm-settings; see issue #1; */
-
 			${mainViewSelector} {
-				scrollbar-width: ${parseInt(mainViewScrollbarWidth, 10) <= 8 ? 'thin' : 'auto' };
-				scrollbar-color: rgba(0,0,0,.25) transparent;
+				scrollbar-width: ${getCssValue('scrollbar-width', { width: mainViewScrollbarWidth })};
+				scrollbar-color: ${getCssValue('scrollbar-color')};
 			}
 
-			${sidebarSelector} {
-				scrollbar-width: ${parseInt(mainViewScrollbarWidth, 10) <= 8 ? 'thin' : 'auto' };
-				scrollbar-color: rgba(0,0,0,.25) transparent;
-			}
-
-			${graphListSelector} {
-				scrollbar-width: ${parseInt(mainViewScrollbarWidth, 10) <= 8 ? 'thin' : 'auto' };
-				scrollbar-color: rgba(0,0,0,.25) transparent;
-			}
-
-			/* EXTRA FIX: the settings tab ("User", "Sharing", "Files", etc) is not scrollable; hopefully this will be fixed upstream; */
-
-			div.rm-settings > div.rm-settings-tabs > div.bp3-tab-list {
-				overflow: auto;
-			}
 		`;
+
+		textContent += cssForMainView;
+		textContent += replaceAll(cssForMainView, mainViewSelector, sidebarSelector);
+
+		// this setting will also affect the graph list
+
+		let graphListSelector = 'div.rm-graphs__search + div.scroll';
+		textContent += replaceAll(cssForMainView, mainViewSelector, graphListSelector);
 	}
 
+
 	if (searchResultsScrollbarWidth !== 'disabled') {
-		const searchListSelector = 'div.rm-find-or-create-wrapper';
+		const searchListSelector = 'div.rm-find-or-create-wrapper ul.rm-find-or-create__menu';
 
 		textContent += `
 
-			/* setting: searchResultsScrollbarWidth */
+			/* SETTING: "Search results: scrollbar width" */
 
-			${searchListSelector} ul.rm-find-or-create__menu::-webkit-scrollbar {
+			${searchListSelector}::-webkit-scrollbar {
 				width: ${searchResultsScrollbarWidth};
-				/* TODO: scrollbar-width */
+			}
+
+			${searchListSelector} {
+				scrollbar-width: ${getCssValue('scrollbar-width', { width: searchResultsScrollbarWidth })};
+				scrollbar-color: ${getCssValue('scrollbar-color')};
+			}
+
+			/* in small viewports the height of the search results needs to be constrained */
+
+			${searchListSelector} {
+				max-height: min(calc(80vh - 10px), 400px);
 			}
 
 			/* give a little space between the input and the results list */
 
-			${searchListSelector} div.bp3-transition-container {
+			div.rm-find-or-create-wrapper div.bp3-transition-container {
 				top: 6px !important;
 			}
 
-			/* improvements for search results in small viewports */
-
-			${searchListSelector} ul.rm-find-or-create__menu {
-				max-height: min(calc(80vh - 10px), 400px);
-			}
 		`;
 	}
+
 
 	if (starredPagesScrollbarWidth !== 'disabled') {
 		const starredPagesListSelector = 'div.starred-pages';
 
 		textContent += `
 
-			/* setting: starredPagesScrollbarWidth */
-
-			/* re-use the scrollbar colors used in .rm-settings; see issue #1; */
+			/* SETTING: "Starred pages: scrollbar width" */
 
 			${starredPagesListSelector}::-webkit-scrollbar {
 				width: ${starredPagesScrollbarWidth};
@@ -370,67 +367,84 @@ function addStyle() {
 			}
 
 			${starredPagesListSelector} {
-				scrollbar-width: ${parseInt(starredPagesScrollbarWidth, 10) <= 8 ? 'thin' : 'auto' };
+				scrollbar-width: ${getCssValue('scrollbar-width', { width: starredPagesScrollbarWidth })};
 				scrollbar-color: #293742 #8A9BA8;
 			}
 		`;
 	}
 
+
 	if (blockEmbedScrollbarWidth !== 'disabled') {
 		if (blockEmbedScrollOnChildren) {
-			textContent += `
+			const cssForMainView = `
 
-				/* setting: blockEmbedScrollbarWidth + blockEmbedScrollOnChildren */
+				/* SETTING: "Block embeds: scrollbar width" + "Block embeds: scroll only on children" */
 
 				${mainViewSelector} div.rm-embed-inner-block-hide > div.roam-block-container > div.rm-level-1::-webkit-scrollbar {
 					width: ${blockEmbedScrollbarWidth};
-					/* TODO: scrollbar-width */
 				}
 
-				${sidebarSelector} div.rm-embed-inner-block-hide > div.roam-block-container > div.rm-level-1::-webkit-scrollbar {
-					width: ${blockEmbedScrollbarWidth};
-					/* TODO: scrollbar-width */
+				${mainViewSelector} div.rm-embed-inner-block-hide > div.roam-block-container > div.rm-level-1 {
+					scrollbar-width: ${getCssValue('scrollbar-width', { width: blockEmbedScrollbarWidth })};
+					scrollbar-color: ${getCssValue('scrollbar-color')};
 				}
+
+
 			`;
+
+			textContent += cssForMainView;
+			textContent += replaceAll(cssForMainView, mainViewSelector, sidebarSelector);
 		}
 		else {
-			textContent += `
+			const cssForMainView = `
 
-				/* setting: blockEmbedScrollbarWidth */
+				/* SETTING: blockEmbedScrollbarWidth */
 
 				${mainViewSelector} div.rm-embed-inner-block-hide > div.roam-block-container::-webkit-scrollbar {
 					width: ${blockEmbedScrollbarWidth};
-					/* TODO: scrollbar-width */
 				}
 
-				${sidebarSelector} div.rm-embed-inner-block-hide > div.roam-block-container::-webkit-scrollbar {
-					width: ${blockEmbedScrollbarWidth};
-					/* TODO: scrollbar-width */
+				${mainViewSelector} div.rm-embed-inner-block-hide > div.roam-block-container {
+					scrollbar-width: ${getCssValue('scrollbar-width', { width: blockEmbedScrollbarWidth })};
+					scrollbar-color: ${getCssValue('scrollbar-color')};
 				}
 			`;
+
+			textContent += cssForMainView;
+			textContent += replaceAll(cssForMainView, mainViewSelector, sidebarSelector);
 		}
 
-		// for page embeds the only place that seems to work is here; the "scroll on children" option is not available;
+		// for page embeds the only selector that seems to work is the one below; the "scroll on children" option is not available in this case;
 
-		textContent += `
+		const applyToPageEmbeds = true;
 
-			${mainViewSelector} div.rm-embed__content::-webkit-scrollbar {
-				width: ${blockEmbedScrollbarWidth};
-				/* TODO: scrollbar-width */
-			}
+		if (applyToPageEmbeds) {
+			const cssForMainView = `
 
-			${sidebarSelector} div.rm-embed__content::-webkit-scrollbar {
-				width: ${blockEmbedScrollbarWidth};
-				/* TODO: scrollbar-width */
-			}
-		`;
+				/* SETTING: "Block embeds: scrollbar width" (for page embeds) */
+
+				${mainViewSelector} div.rm-embed__content::-webkit-scrollbar {
+					width: ${blockEmbedScrollbarWidth};
+				}
+
+				${mainViewSelector} div.rm-embed__content {
+					scrollbar-width: ${getCssValue('scrollbar-width', { width: blockEmbedScrollbarWidth })};
+					scrollbar-color: ${getCssValue('scrollbar-color')};
+				}
+
+			`;
+
+			textContent += cssForMainView;
+			textContent += replaceAll(cssForMainView, mainViewSelector, sidebarSelector);
+		}
 	}
+
 
 	if (blockEmbedMaxHeight !== 'disabled') {
 		if (blockEmbedScrollOnChildren) {
-			textContent += `
-
-				/* setting: blockEmbedMaxHeight + blockEmbedScrollOnChildren */
+			const cssForMainView = `
+			
+				/* SETTING: "Block embeds: maximum height" + "Block embeds: scroll only on children" */
 				/* padding-bottom is a css hack to avoid showing the scrollbar when the embed height is < embed max height */
 
 				${mainViewSelector} div.rm-embed-inner-block-hide > div.roam-block-container > div.rm-level-1 {
@@ -439,19 +453,22 @@ function addStyle() {
 					padding-bottom: 14px;
 					display: block;
 				}
-				
-				${sidebarSelector} div.rm-embed-inner-block-hide > div.roam-block-container > div.rm-level-1 {
-					max-height: ${blockEmbedMaxHeight};
-					overflow-y: auto;
-					padding-bottom: 14px;
-					display: block;
+
+				/* add a subtle border color to the container (5% shade relative to the default background color, #EBF1F5);
+				generated with this tool: https://noeldelgado.github.io/shadowlord */
+
+				div.rm-embed-container {
+					border: 1px solid #dfe5e9;
 				}
 			`;
+
+			textContent += cssForMainView;
+			textContent += replaceAll(cssForMainView, mainViewSelector, sidebarSelector);
 		}
 		else {
-			textContent += `
+			const cssForMainView = `
 
-				/* setting: blockEmbedMaxHeight */
+				/* SETTING: "Block embeds: maximum height" */
 				/* padding-bottom is a css hack to avoid showing the scrollbar when the embed height is < embed max height */
 
 				${mainViewSelector} div.rm-embed-inner-block-hide > div.roam-block-container {
@@ -460,64 +477,93 @@ function addStyle() {
 					padding-bottom: 14px;
 				}
 
-				${sidebarSelector} div.rm-embed-inner-block-hide > div.roam-block-container {
-					max-height: ${blockEmbedMaxHeight};
-					overflow-y: auto;
-					padding-bottom: 14px;
+				/* add a subtle border color to the container (5% shade relative to the default background color, #EBF1F5);
+				generated with this tool: https://noeldelgado.github.io/shadowlord */
+
+				div.rm-embed-container {
+					border: 1px solid #dfe5e9;
 				}
 			`;
+
+			textContent += cssForMainView;
+			textContent += replaceAll(cssForMainView, mainViewSelector, sidebarSelector);
 		}
 
-		// for page embeds the only place that seems to work is here; no need to use the padding-bottom hack here;
+		// for page embeds the only selector that seems to work is the one below; no need to use the padding-bottom hack in this case;
 
-		textContent += `
+		const applyToPageEmbeds = true;
 
-			${mainViewSelector} div.rm-embed__content {
-				max-height: ${blockEmbedMaxHeight};
-				overflow-y: auto;
-				padding-left: 6px;
-			}
+		if (applyToPageEmbeds) {
+			const cssForMainView = `
 
-			${sidebarSelector} div.rm-embed__content {
-				max-height: ${blockEmbedMaxHeight};
-				overflow-y: auto;
-				padding-left: 6px;
-			}
-		`
+				/* SETTING: "Block embeds: maximum height" (for page embeds) */
+
+				${mainViewSelector} div.rm-embed__content {
+					max-height: ${blockEmbedMaxHeight};
+					overflow-y: auto;
+					padding-left: 6px;
+				}
+
+				/* add a subtle border color to the container (5% shade relative to the default background color, #EBF1F5);
+				generated with this tool: https://noeldelgado.github.io/shadowlord */
+
+				div.rm-embed-container {
+					border: 1px solid #dfe5e9;
+				}
+			`;
+
+			textContent += cssForMainView;
+			textContent += replaceAll(cssForMainView, mainViewSelector, sidebarSelector);
+		}
 	}
 
-	if (codeBlockScrollbarWidth !== 'disabled') {
-		textContent += `
 
-			/* setting: codeBlockScrollbarWidth */
+	if (codeBlockScrollbarWidth !== 'disabled') {
+		const cssForMainView = `
+
+			/* SETTING: "Code blocks: scrollbar width" */
 
 			${mainViewSelector} div.cm-scroller::-webkit-scrollbar {
 				width: ${codeBlockScrollbarWidth};
-				/* TODO: scrollbar-width */
 			}
 
-			${sidebarSelector} div.cm-scroller::-webkit-scrollbar {
-				width: ${codeBlockScrollbarWidth};
-				/* TODO: scrollbar-width */
+			${mainViewSelector} div.cm-scroller {
+				scrollbar-width: ${getCssValue('scrollbar-width', { width: codeBlockScrollbarWidth })};
+				scrollbar-color: ${getCssValue('scrollbar-color')};
 			}
+
+			div.rm-code-block {
+				border: 1px solid #e9e9e9;
+			}
+			
 		`;
+
+		textContent += cssForMainView;
+		textContent += replaceAll(cssForMainView, mainViewSelector, sidebarSelector);
 	}
 
 	if (codeBlockMaxHeight !== 'disabled') {
-		textContent += `
+		const cssForMainView = `
 
-			/* setting: codeBlockMaxHeight */
+			/* SETTING: "Code blocks: maximum height" */
 
 			${mainViewSelector} div.cm-editor {
 				max-height: ${codeBlockMaxHeight};
 				overflow-y: auto;
 			}
 
-			${sidebarSelector} div.cm-editor {
-				max-height: ${codeBlockMaxHeight};
-				overflow-y: auto;
+			/* add a subtle border color to the container (5% shade relative to the default background color, #f5f5f5);
+				generated with this tool: https://noeldelgado.github.io/shadowlord */
+
+			div.rm-code-block,
+			div.rm-code-block__settings-bar {
+				border: 1px solid #e9e9e9;
 			}
+
 		`;
+
+		textContent += cssForMainView;
+		textContent += replaceAll(cssForMainView, mainViewSelector, sidebarSelector);
 	}
 
 	let extensionStyle = document.createElement('style');
@@ -528,6 +574,28 @@ function addStyle() {
 	extensionStyle.dataset.isDev = String(internals.isDev);
 
 	document.head.appendChild(extensionStyle);
+}
+
+// is String.prototype.replaceAll() safe to use by now? 
+
+function replaceAll (inputStr, searchStr, replacementStr) {
+
+	return inputStr.split(searchStr).join(replacementStr);
+}
+
+function getCssValue (cssProperty , { width } = {}) {
+
+	let value = '';
+
+	if (cssProperty === 'scrollbar-color') {
+		value = `rgba(0,0,0,.25) transparent`;
+	}
+
+	if (cssProperty === 'scrollbar-width') {
+		value = parseInt(width, 10) <= 8 ? 'thin' : 'auto';
+	}
+
+	return value;
 }
 
 export default {

@@ -16,9 +16,9 @@ Click the images below to see an overview of the changes produced by this extens
 
 - the main view and sidebar now have scrollbars;
 - the small block embeds and code blocks have not changed (no need for a scrollbar there);
-- the big block embeds and code blocks now have a maximum height (that is, if their contents is big enough, the height is limited and a scrollbar for them is shown);
+- the big block embeds and code blocks now have a maximum height and scrollbar (that is, if their contents is big enough, the height is limited);
 
-In this case the "maximum height" settings were configured with "30vh" (a percentage of the viewport height). However you can disable this feature.
+In this case the "maximum height" settings were configured with "30vh" (a percentage of the viewport height). You can disable this feature if you prefer.
 
 <p align="center">
 	<img 
@@ -61,11 +61,11 @@ Another example:
 	>
 </p>
 
-Here we have the browser window resized to take half of the screen height. After the extension is loaded we can see some changes in the Shortcuts / Starred pages list and in the search results. Having a scrollbar in the search results is useful to give a hint that there are more results than what is shown. Once again, this features can be disabled.
+Here we have the browser window resized to take half of the screen height. After the extension is loaded we can see some changes in the Shortcuts / Starred pages list and in the search results. Having a scrollbar in the search results is useful to give a hint that there are more results than what is shown. Once again, these features can be disabled.
 
 ## Using with custom themes
 
-While this extension is meant to be used with the default Roam theme, you can use it safely with any custom theme. But check if the scrollbars / max-height issues have already been addressed in the custom theme. If so this extension is probably not useful (nevertheless you can still use it to control some aspects of the scrollbars).
+While this extension is meant to be used with the default Roam theme, you can also use it safely with any custom theme. But check if the scrollbars / max-height issues have already been addressed in the custom theme. If so this extension is probably not useful (nevertheless you can still use it to control some aspects of the scrollbars).
 
 
 ## Using the "disabled" option
@@ -75,7 +75,6 @@ All settings/features in this extension can be disabled. When the "disabled" opt
 
 ## Future improvements
 
-- the controls in the settings panel look ugly because of the long descriptions; can we have more control there? how are other extesions doing this?
 - [DONE] detect if the extension is being loaded in the mobile app in android, and if necessary, don't add the stylesheet (?)
 	- conclusion: in the mobile app, the extension also needs to be loaded; native scrollbars don't work there...
 - check if the other types of embeds can also benefit from max-height + scrollbar: PDF embed, Website embed, etc
