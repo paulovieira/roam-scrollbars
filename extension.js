@@ -572,11 +572,18 @@ function addStyle() {
 	document.head.appendChild(extensionStyle);
 }
 
-// is String.prototype.replaceAll() safe to use by now? 
-
 function replaceAll (inputStr, searchStr, replacementStr) {
 
-	return inputStr.split(searchStr).join(replacementStr);
+	// is String.prototype.replaceAll() safe to use by now? 
+	let out = inputStr.split(searchStr).join(replacementStr);
+
+	let idx = out.indexOf('*/');
+
+	if (idx !== -1) {
+		out = out.slice(0, idx + 2) + ` /* replace "${searchStr}" with "${replacementStr}" */` + out.slice(idx + 2);
+	}
+
+	return out;
 }
 
 function getCssValue (cssProperty , { width } = {}) {
