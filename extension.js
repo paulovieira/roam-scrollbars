@@ -451,7 +451,7 @@ function addStyle() {
 				/* add a subtle border color to the container (5% shade relative to the default background color, #EBF1F5);
 				generated with this tool: https://noeldelgado.github.io/shadowlord */
 
-				div.rm-embed-container {
+				${mainViewSelector} div.rm-embed-container {
 					border: 1px solid #dfe5e9;
 				}
 
@@ -475,7 +475,7 @@ function addStyle() {
 				/* add a subtle border color to the container (5% shade relative to the default background color, #EBF1F5);
 				generated with this tool: https://noeldelgado.github.io/shadowlord */
 
-				div.rm-embed-container {
+				${mainViewSelector} div.rm-embed-container {
 					border: 1px solid #dfe5e9;
 				}
 
@@ -503,7 +503,7 @@ function addStyle() {
 				/* add a subtle border color to the container (5% shade relative to the default background color, #EBF1F5);
 				generated with this tool: https://noeldelgado.github.io/shadowlord */
 
-				div.rm-embed-container {
+				${mainViewSelector} div.rm-embed-container {
 					border: 1px solid #dfe5e9;
 				}
 
@@ -548,11 +548,11 @@ function addStyle() {
 			/* add a subtle border color to the container (5% shade relative to the default background color, #f5f5f5);
 				generated with this tool: https://noeldelgado.github.io/shadowlord */
 
-			div.rm-code-block {
+			${mainViewSelector} div.rm-code-block {
 				border: 1px solid #e9e9e9;
 			}
 
-			div.rm-code-block__settings-bar {
+			${mainViewSelector} div.rm-code-block__settings-bar {
 				border-top: 1px solid #e9e9e9;
 			}
 
@@ -580,7 +580,7 @@ function replaceAll (inputStr, searchStr, replacementStr) {
 	let idx = out.indexOf('*/');
 
 	if (idx !== -1) {
-		out = out.slice(0, idx + 2) + ` /* replace "${searchStr}" with "${replacementStr}" */` + out.slice(idx + 2);
+		out = out.slice(0, idx) + ` (replace "${searchStr}" with "${replacementStr}") ` + out.slice(idx);
 	}
 
 	return out;
