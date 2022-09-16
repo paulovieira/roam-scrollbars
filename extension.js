@@ -34,6 +34,10 @@ internals.settingsDefault = {
 	blockEmbedScrollOnChildren: false,
 };
 
+internals.installedExtensions = {
+	roamStudio: false,  // https://github.com/rcvd/RoamStudio
+}
+
 function onload({ extensionAPI }) {
 
 	log('ONLOAD (start)');
@@ -219,6 +223,10 @@ function initializeSettings() {
 		
 		updateSettingsCached({ key, value, resetStyle: false });
 	});
+
+	// detect if other extensions are loaded; if so we might need to make a few tweaks;
+
+	internals.installedExtensions.roamStudio = (document.querySelectorAll('style[id^="roamstudio"]').length > 0);
 }
 
 function updateSettingsCached({ key, value, resetStyle: _resetStyle }) {
@@ -345,6 +353,9 @@ function addStyle() {
 
 	if (starredPagesScrollbarWidth !== 'disabled') {
 		const starredPagesListSelector = 'div.starred-pages';
+		const hoverColor = 'rgba(0,0,0,.2)';
+		const trackColor = internals.installedExtensions.roamStudio ? 'rgba(0,0,0,.05)' : '#293742';
+		const thumbColor = internals.installedExtensions.roamStudio ? 'rgba(0,0,0,.25)' : '#8A9BA8';
 
 		textContent += `
 
@@ -352,19 +363,33 @@ function addStyle() {
 
 			${starredPagesListSelector}::-webkit-scrollbar {
 				width: ${starredPagesScrollbarWidth};
-				background-color: #293742;
+				background-color: ${trackColor};
 			}
 
 			${starredPagesListSelector}::-webkit-scrollbar-thumb {
-				background-color: #8A9BA8;
+				background-color: ${thumbColor};
 			}
 
 			${starredPagesListSelector} {
 				scrollbar-width: ${getCssValue('scrollbar-width', { width: starredPagesScrollbarWidth })};
-				scrollbar-color: #293742 #8A9BA8;
+				scrollbar-color: ${trackColor} ${thumbColor};
 			}
 
 		`;
+
+		// add hover color only for roam studio; in the default theme mimic the scrollbar in the settings modal
+		// (which doesn't have hover)
+
+		if (internals.installedExtensions.roamStudio) {
+			textContent += `
+
+				${starredPagesListSelector}::-webkit-scrollbar:hover {
+					background-color: ${hoverColor};
+				}
+
+			`;
+		}
+
 	}
 
 
@@ -435,6 +460,11 @@ function addStyle() {
 
 
 	if (blockEmbedMaxHeight !== 'disabled') {
+
+		// background colors: #EBF1F5 (default), #fcfcfc (roam studio light), #?????? (roam studio dark)
+
+		let borderColor = internals.installedExtensions.roamStudio ? '#efefef' : '#dfe5e9';
+
 		if (blockEmbedScrollOnChildren) {
 			const cssForMainView = `
 			
@@ -452,7 +482,7 @@ function addStyle() {
 				generated with this tool: https://noeldelgado.github.io/shadowlord */
 
 				${mainViewSelector} div.rm-embed-container {
-					border: 1px solid #dfe5e9;
+					border: 1px solid ${borderColor};
 				}
 
 			`;
@@ -476,7 +506,7 @@ function addStyle() {
 				generated with this tool: https://noeldelgado.github.io/shadowlord */
 
 				${mainViewSelector} div.rm-embed-container {
-					border: 1px solid #dfe5e9;
+					border: 1px solid ${borderColor};
 				}
 
 			`;
@@ -490,6 +520,10 @@ function addStyle() {
 		const applyToPageEmbeds = true;
 
 		if (applyToPageEmbeds) {
+			// background colors: #EBF1F5 (default), #ececec (roam studio light), #?????? (roam studio dark)
+
+			let borderColor = internals.installedExtensions.roamStudio ? '#e0e0e0' : '#dfe5e9';
+
 			const cssForMainView = `
 
 				/* SETTING: "Block embeds: maximum height" (for page embeds) */
@@ -504,7 +538,7 @@ function addStyle() {
 				generated with this tool: https://noeldelgado.github.io/shadowlord */
 
 				${mainViewSelector} div.rm-embed-container {
-					border: 1px solid #dfe5e9;
+					border: 1px solid ${borderColor};
 				}
 
 			`;
@@ -522,6 +556,7 @@ function addStyle() {
 
 			${mainViewSelector} div.cm-scroller::-webkit-scrollbar {
 				width: ${codeBlockScrollbarWidth};
+
 			}
 
 			${mainViewSelector} div.cm-scroller {
@@ -536,7 +571,10 @@ function addStyle() {
 	}
 
 	if (codeBlockMaxHeight !== 'disabled') {
-		const cssForMainView = `
+		// background colors: #f5f5f5 (default), #ececec (roam studio light), #?????? (roam studio dark)
+
+		let borderColor = internals.installedExtensions.roamStudio ? '#e0e0e0' : '#e9e9e9';
+		let cssForMainView = `
 
 			/* SETTING: "Code blocks: maximum height" */
 
@@ -545,15 +583,19 @@ function addStyle() {
 				overflow-y: auto;
 			}
 
-			/* add a subtle border color to the container (5% shade relative to the default background color, #f5f5f5);
+			/* add a subtle border color to the container (5% shade relative to the background color);
 				generated with this tool: https://noeldelgado.github.io/shadowlord */
-
+			
 			${mainViewSelector} div.rm-code-block {
-				border: 1px solid #e9e9e9;
+				border: 1px solid ${borderColor};
 			}
 
 			${mainViewSelector} div.rm-code-block__settings-bar {
-				border-top: 1px solid #e9e9e9;
+				border-top: 1px solid ${borderColor};
+			}
+
+			${mainViewSelector} div.cm-gutters {
+				border-right: 1px solid ${borderColor} !important;
 			}
 
 		`;
